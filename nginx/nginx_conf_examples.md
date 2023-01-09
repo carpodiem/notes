@@ -1,9 +1,8 @@
-##nginx location block
+## nginx location block
 
-'''
+```
 $ cat /etc/nginx/nginx.conf
 events {}
-
 
 http {
   
@@ -37,13 +36,12 @@ http {
     }
   }
 }
-'''
+```
 
+## nginx variables
 
-##nginx variables
-
+```
 events {}
-
 
 http {
 
@@ -77,13 +75,12 @@ http {
 #    }
   }
 }
+```
 
+## nginx rewrites and redirects
 
-##nginx rewrites and redirects
-
-'''
+```
 events {}
-
 
 http {
 
@@ -112,13 +109,12 @@ http {
     }
   }
 }
-'''
+```
 
 ## nginx try files and named locations
 
-'''
+```
 events {}
-
 
 http {
   
@@ -145,4 +141,33 @@ http {
     }
   }
 }
-'''
+```
+
+## nginx logging
+
+```
+events {}
+
+
+http {
+  
+  include mime.types;
+ 
+  server {
+
+    listen 80;
+    server_name 34.125.158.244;
+    
+    root /sites/demo;
+
+    location /secure {
+
+    access_log /var/log/nginx/secure.access.log;
+    access_log /var/log/nginx/access.log;
+#    access_log off;
+    return 200 "Welcome to secure.";
+    }
+  }
+}
+```
+
