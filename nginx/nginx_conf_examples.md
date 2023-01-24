@@ -171,3 +171,124 @@ http {
 }
 ```
 
+## nginx index php fastcgi
+
+```
+user www-data;
+
+events {}
+
+http {
+  
+  include mime.types;
+ 
+  server {
+
+    listen 80;
+    server_name 34.125.158.244;
+    
+    root /sites/demo;
+  
+    index index.php index.htmll;
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+    location ~\php$ {
+      # Pass php requests to the php-fpm service (fastcgi)
+      include fastcgi.conf;
+      fastcgi_pass unix:/var/run/php.sock;
+    }
+
+  }
+}
+```
+
+## nginx workers and pids
+
+```
+user www-data;
+
+worker_processes auto;
+
+pid /var/run/new_nginx.pid;
+
+events {
+  worker_connections 512;
+}
+
+http {
+  
+  include mime.types;
+ 
+  server {
+
+    listen 80;
+    server_name 34.125.158.244;
+    
+    root /sites/demo;
+  
+    index index.php index.htmll;
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+#    location ~\php$ {
+#      # Pass php requests to the php-fpm service (fastcgi)
+#      include fastcgi.conf;
+#      fastcgi_pass unix:/var/run/php.sock;
+#    }
+
+  }
+}
+```
+
+## Headers and Expires
+
+```
+user www-data;
+
+worker_processes auto;
+
+pid /var/run/new_nginx.pid;
+
+events {
+  worker_connections 512;
+}
+
+http {
+
+  include mime.types;
+
+  server {
+
+    listen 80;
+    server_name 34.125.158.244;
+
+    root /sites/demo;
+
+    index index.php index.html;
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+#    location ~\php$ {
+#      # Pass php requests to the php-fpm service (fastcgi)
+#      include fastcgi.conf;
+#      fastcgi_pass unix:/var/run/php.sock;
+#    }
+
+    location ~* \.(css|js|jpg|png)$ {
+      access_log off;
+#      add_header my_header "Hello world";
+      add_header Cache-Control public;
+      add_header Pragma public;
+      add_header Vary Accept-Encoding;
+      expires 1M;
+    }
+  }
+}
+```
