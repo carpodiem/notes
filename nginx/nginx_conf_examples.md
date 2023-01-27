@@ -292,3 +292,73 @@ http {
   }
 }
 ```
+
+## Compressed responses
+
+`curl -I -H "Accept-Encoding: gzip, deflate" http://jw06/style.css`
+HTTP/1.1 200 OK
+Server: nginx/1.23.3
+Date: Fri, 27 Jan 2023 21:53:56 GMT
+Content-Type: text/css
+Last-Modified: Wed, 21 Dec 2022 21:06:02 GMT
+Connection: keep-alive
+ETag: W/"63a3753a-3d5"
+Expires: Sun, 26 Feb 2023 21:53:56 GMT
+Cache-Control: max-age=2592000
+Cache-Control: public
+Pragma: public
+Vary: Accept-Encoding
+**Content-Encoding: gzip**
+
+
+```
+user www-data;
+
+worker_processes auto;
+
+pid /var/run/new_nginx.pid;
+
+events {
+  worker_connections 512;
+}
+
+http {
+
+  include mime.types;
+  
+  gzip on;
+  gzip_comp_level 3;
+
+  gzip_types text/css;
+  gzip_types text/javascript;
+
+  server {
+
+    listen 80;
+    server_name 34.125.158.244;
+
+    root /sites/demo;
+
+    index index.php index.html;
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+#    location ~\php$ {
+#      # Pass php requests to the php-fpm service (fastcgi)
+#      include fastcgi.conf;
+#      fastcgi_pass unix:/var/run/php.sock;
+#    }
+
+    location ~* \.(css|js|jpg|png)$ {
+      access_log off;
+#      add_header my_header "Hello world";
+      add_header Cache-Control public;
+      add_header Pragma public;
+      add_header Vary Accept-Encoding;
+      expires 1M;
+    }
+  }
+}
+```
