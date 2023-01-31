@@ -362,3 +362,75 @@ http {
   }
 }
 ```
+
+## FastCGI cache
+
+```
+
+
+pid /var/run/new_nginx.pid;
+
+events {
+  worker_connections 512;
+}
+
+http {
+
+  include mime.types;
+
+  #Configure microcache(fastcgi)
+  fastcgi_cache_path /tmp/nginx_cache levels=1:2 key_zone=ZONE_1:100m inactive=60m;
+  fastcgi_cache_key "$scheme$request_method$host$request_uri";
+  add_header X-Cache $upstream_cache_status;
+
+  server {
+
+    listen 80;
+    server_name 34.125.158.244;
+
+    root /sites/demo;
+
+    index index.php index.html;
+
+    # Cache by default
+    set no_cache 0;
+
+    #Check for cache bypass
+    if ($arg_skipcache = 1) {
+      set $no_cache 1;
+    }
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+#    location ~\php$ {
+#      # Pass php requests to the php-fpm service (fastcgi)
+#      include fastcgi.conf;
+#      fastcgi_pass unix:/var/run/php.sock;
+
+#      #Enable cache 
+#      fastcgi_cache ZONE_1;
+#      fastcgi_cache_valid 200 404 60m
+#      fastcgi_cache_bypass $no_cache;
+#      fastcgi_no_cache $no_cache;
+#    }
+
+    }
+  }
+}
+
+```
+```
+curl -I http://...
+...
+X-Cache: HIT
+
+curl -I http://.../index.html
+...
+X-Cache: MISS
+
+curl -I http://.../?skipcache=1
+...
+X-Cache: BYPASS
+```
