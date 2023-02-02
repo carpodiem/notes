@@ -434,3 +434,99 @@ curl -I http://.../?skipcache=1
 ...
 X-Cache: BYPASS
 ```
+
+## HTTP2
+nginx -V
+./configure --help | grep http_v2
+
+```
+user www-data;
+
+worker_processes auto;
+
+pid /var/run/new_nginx.pid;
+
+events {
+  worker_connections 512;
+}
+
+http {
+
+  include mime.types;
+
+  server {
+
+    listen 443 ssl http2;
+    server_name 34.125.158.244;
+
+    root /sites/demo;
+
+    index index.php index.html;
+
+    ssl_certificate /etc/nginx/ssl/self.crt;
+    ssl_certificate_key /etc/nginx/ssl/self.key;
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+#    location ~\php$ {
+#      # Pass php requests to the php-fpm service (fastcgi)
+#      include fastcgi.conf;
+#      fastcgi_pass unix:/var/run/php.sock;
+
+#    }
+  }
+}
+
+```
+
+## Server Push
+nghttp2 
+
+```
+user www-data;
+
+worker_processes auto;
+
+pid /var/run/new_nginx.pid;
+
+events {
+  worker_connections 512;
+}
+
+http {
+
+  include mime.types;
+
+  server {
+
+    listen 443 ssl http2;
+    server_name 34.125.158.244;
+
+    root /sites/demo;
+
+    index index.php index.html;
+
+    ssl_certificate /etc/nginx/ssl/self.crt;
+    ssl_certificate_key /etc/nginx/ssl/self.key;
+
+    location = /index.html {
+      http2_push /style.css;
+      http2_push /thumb.png;
+    }
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+#    location ~\php$ {
+#      # Pass php requests to the php-fpm service (fastcgi)
+#      include fastcgi.conf;
+#      fastcgi_pass unix:/var/run/php.sock;
+
+#    }
+  }
+}
+
+```
